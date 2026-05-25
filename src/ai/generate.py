@@ -7,7 +7,7 @@ from src.utils.logger import get_logger
 logger = get_logger("generate")
 
 MODEL = "gemini-2.5-flash"
-MAX_TOKENS = 1024
+MAX_TOKENS = 4096
 
 
 def generate_analysis(data: dict) -> dict:
@@ -17,7 +17,7 @@ def generate_analysis(data: dict) -> dict:
         model_name=MODEL,
         system_instruction=SYSTEM_PROMPT,
         generation_config=genai.GenerationConfig(
-            max_output_tokens=4096,
+            max_output_tokens=MAX_TOKENS,
             temperature=0.3,
         ),
     )
@@ -33,7 +33,6 @@ def generate_analysis(data: dict) -> dict:
             usage.candidates_token_count,
         )
 
-        # 마크다운 코드블록 방어 처리 (모델이 ```json ... ``` 로 감쌀 경우)
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"):

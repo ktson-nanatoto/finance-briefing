@@ -329,6 +329,15 @@
       </li>
       {% endif %}
       {% endfor %}
+      {% if analysis.us_news_kr %}
+      {% for article in analysis.us_news_kr[:4] %}
+      <li>
+        <span class="news-source">{{ article.source }}</span>
+        {{ article.title_kr }}
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">{{ article.title_en }}</div>
+      </li>
+      {% endfor %}
+      {% else %}
       {% for article in data.news.us_news[:4] %}
       {% if article.title %}
       <li>
@@ -337,6 +346,7 @@
       </li>
       {% endif %}
       {% endfor %}
+      {% endif %}
     </ul>
   </div>
   {% endif %}

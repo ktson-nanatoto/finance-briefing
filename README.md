@@ -1,13 +1,13 @@
 # 재테크 모닝 브리핑 자동화 시스템
 
-매일 06:30 KST에 금융 데이터를 수집·분석하여 HTML 카드뉴스를 GitHub Pages로 자동 배포합니다.
+매일 07:30 KST에 금융 데이터를 수집·분석하여 HTML 카드뉴스를 GitHub Pages로 자동 배포합니다.
 
 ## 아키텍처
 
 ```
 크롤러 (Yahoo Finance / 네이버 금융 / FRED / ECOS / Reuters / CNBC)
   → 데이터 검증 + Fallback
-  → Claude API 분석 (JSON, 프롬프트 캐싱)
+  → Gemini API 분석 + 미국 뉴스 한국어 번역
   → Jinja2 HTML 렌더링
   → GitHub Pages 배포
   → 텔레그램 알림
@@ -21,7 +21,7 @@
 
 | Secret 이름 | 설명 | 발급처 |
 |------------|------|--------|
-| `ANTHROPIC_API_KEY` | Claude API 키 | https://console.anthropic.com |
+| `GEMINI_API_KEY` | Gemini API 키 | https://aistudio.google.com/app/apikey |
 | `FRED_API_KEY` | FRED API 키 (무료) | https://fred.stlouisfed.org/docs/api/api_key.html |
 | `ECOS_API_KEY` | 한국은행 ECOS API 키 (무료) | https://ecos.bok.or.kr/api/#/DevGuide/APIKeyApply |
 | `TELEGRAM_BOT_TOKEN` | 텔레그램 봇 토큰 | 아래 설명 참고 |
@@ -66,7 +66,7 @@ open output/index.html
 ### .env.example
 
 ```
-ANTHROPIC_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
 FRED_API_KEY=your_key_here
 ECOS_API_KEY=your_key_here
 TELEGRAM_BOT_TOKEN=your_token_here
@@ -92,9 +92,9 @@ GitHub Actions → Daily Finance Briefing → Run workflow
 - 네이버 서버 점검 시간(새벽 2~4시) 회피 필요
 - `cache/` 폴더에 전날 JSON이 있으면 자동 fallback
 
-### Claude API 오류
-- `ANTHROPIC_API_KEY` 유효 여부 확인
-- 잔액 부족 시 https://console.anthropic.com 에서 충전
+### Gemini API 오류
+- `GEMINI_API_KEY` 유효 여부 확인
+- 할당량 초과 시 https://aistudio.google.com 에서 확인
 
 ### QR코드 미표시
 - `PAGES_URL` Secret이 설정되지 않은 경우 발생
@@ -116,11 +116,11 @@ GitHub Actions → Daily Finance Briefing → Run workflow
 │   │   ├── us_market.py      # Yahoo Finance (S&P500, NASDAQ, DOW, VIX)
 │   │   ├── kr_market.py      # 네이버 금융 (KOSPI, KOSDAQ, 환율, 유가, 금)
 │   │   ├── macro.py          # FRED (미국 금리/국채), ECOS (한국 기준금리)
-│   │   ├── news.py           # 네이버 경제뉴스, Reuters, CNBC RSS
+│   │   ├── news.py           # 네이버 경제뉴스, CNBC, Yahoo Finance RSS
 │   │   └── realestate.py     # 네이버 부동산 뉴스
 │   ├── ai/
-│   │   ├── prompt.py         # 시스템 프롬프트 + 프롬프트 캐싱
-│   │   └── generate.py       # Claude API 호출 → JSON 반환
+│   │   ├── prompt.py         # 시스템 프롬프트
+│   │   └── generate.py       # Gemini API 호출 → JSON 반환 + 미국 뉴스 번역
 │   ├── templates/
 │   │   └── briefing.html.j2  # Jinja2 HTML 템플릿
 │   ├── utils/
@@ -143,9 +143,9 @@ GitHub Actions → Daily Finance Briefing → Run workflow
 
 | 항목 | 비용 |
 |------|------|
-| Claude API (캐싱 적용) | ~$1.5~2 USD/월 |
+| Gemini API (gemini-2.5-flash) | 무료 (할당량 내) |
 | FRED API | 무료 |
 | ECOS API | 무료 |
 | GitHub Actions | 무료 (Public repo) |
 | GitHub Pages | 무료 |
-| **합계** | **~$2 USD/월** |
+| **합계** | **~$0 USD/월** |
