@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>재테크 모닝 브리핑 — {{ date }}</title>
+  <title>경제뉴스 모닝 브리핑 — {{ date }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
@@ -155,7 +155,7 @@
   <!-- 1. 헤더 -->
   <div class="card header">
     <div class="date">{{ date }}</div>
-    <div class="title">재테크 모닝 브리핑</div>
+    <div class="title">경제뉴스 모닝 브리핑</div>
     <span class="badge {% if analysis.market_status == '장중' %}badge-open{% else %}badge-close{% endif %}">
       {{ analysis.market_status }}
     </span>
