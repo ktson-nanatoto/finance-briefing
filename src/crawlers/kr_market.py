@@ -1,6 +1,7 @@
 import random
 import time
 import requests
+import yfinance as yf
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 USER_AGENTS = [
@@ -8,17 +9,14 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 ]
 
-# 네이버 금융: 지수 (KOSPI/KOSDAQ)
 NAVER_INDEX_URL = "https://m.stock.naver.com/api/index/{code}/basic"
 INDEX_CODES = {"kospi": "KOSPI", "kosdaq": "KOSDAQ"}
 
-# Yahoo Finance: 환율 + 원자재 (네이버 환율 API 지원 종료로 대체)
-YAHOO_URL = "https://query2.finance.yahoo.com/v8/finance/chart/{symbol}"
 YAHOO_TICKERS = {
-    "usd_krw": "KRW=X",       # USD/KRW 환율
-    "jpy_krw": "JPYKRW=X",    # JPY/KRW 환율 (100엔)
-    "oil_wti": "CL=F",        # WTI 원유
-    "gold": "GC=F",            # 금
+    "usd_krw": "KRW=X",
+    "jpy_krw": "JPYKRW=X",
+    "oil_wti": "CL=F",
+    "gold": "GC=F",
 }
 
 
@@ -26,13 +24,6 @@ def _naver_headers():
     return {
         "User-Agent": random.choice(USER_AGENTS),
         "Referer": "https://finance.naver.com/",
-        "Accept": "application/json",
-    }
-
-
-def _yahoo_headers():
-    return {
-        "User-Agent": random.choice(USER_AGENTS),
         "Accept": "application/json",
     }
 
@@ -49,16 +40,15 @@ def _fetch_naver_index(code: str) -> dict:
     return {"price": current, "change": change, "change_pct": change_pct}
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=5, max=20))
 def _fetch_yahoo(symbol: str) -> dict:
-    url = YAHOO_URL.format(symbol=symbol)
-    resp = requests.get(url, headers=_yahoo_headers(), params={"interval": "1d", "range": "2d"}, timeout=10)
-    resp.raise_for_status()
-    meta = resp.json()["chart"]["result"][0]["meta"]
-    prev_close = meta.get("chartPreviousClose") or meta.get("previousClose", 0)
-    current = meta.get("regularMarketPrice", 0)
+    ticker = yf.Ticker(symbol)
+    info = ticker.fast_info
+    current = info.last_price
+    prev_close = info.previous_close
+    if not current or not prev_close:
+        raise ValueError(f"No data for {symbol}")
     change = current - prev_close
-    change_pct = (change / prev_close * 100) if prev_close else 0
+    change_pct = (change / prev_close) * 100
     return {
         "price": round(current, 4),
         "change": round(change, 4),
@@ -79,7 +69,6 @@ def fetch() -> dict:
     for name, symbol in YAHOO_TICKERS.items():
         try:
             result[name] = _fetch_yahoo(symbol)
-            time.sleep(random.uniform(2, 3))
         except Exception as e:
             result[name] = {"error": str(e)}
 
