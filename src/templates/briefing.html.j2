@@ -309,7 +309,7 @@
       {% endif %}
       <ul class="news-list">
         {% for article in data.realestate.articles[:3] %}
-        <li>{{ article.title }}</li>
+        <li>{% if article.url %}<a href="{{ article.url }}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">{{ article.title }}</a>{% else %}{{ article.title }}{% endif %}</li>
         {% endfor %}
       </ul>
     </div>
@@ -325,7 +325,7 @@
       {% if article.title %}
       <li>
         <span class="news-source">국내</span>
-        {{ article.title }}
+        {% if article.url %}<a href="{{ article.url }}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">{{ article.title }}</a>{% else %}{{ article.title }}{% endif %}
       </li>
       {% endif %}
       {% endfor %}
@@ -333,7 +333,7 @@
       {% for article in analysis.us_news_kr[:4] %}
       <li>
         <span class="news-source">{{ article.source }}</span>
-        {{ article.title_kr }}
+        {% if article.url %}<a href="{{ article.url }}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">{{ article.title_kr }}</a>{% else %}{{ article.title_kr }}{% endif %}
         <div style="font-size:11px; color:var(--text-sub); margin-top:2px">{{ article.title_en }}</div>
       </li>
       {% endfor %}
@@ -342,7 +342,7 @@
       {% if article.title %}
       <li>
         <span class="news-source">{{ article.source }}</span>
-        {{ article.title }}
+        {% if article.url %}<a href="{{ article.url }}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">{{ article.title }}</a>{% else %}{{ article.title }}{% endif %}
       </li>
       {% endif %}
       {% endfor %}
