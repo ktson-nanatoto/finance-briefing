@@ -1,0 +1,30 @@
+# 환경변수 (API 키 절대 커밋 금지)
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# 캐시 데이터 (fallback용 JSON은 로컬만 유지)
+cache/
+
+# 로그
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# QR코드 이미지 (output에 임베드되므로 별도 파일 불필요)
+*.png

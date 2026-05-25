@@ -1,0 +1,21 @@
+# HTTP / 크롤링
+requests==2.31.0
+beautifulsoup4==4.12.3
+lxml==5.1.0
+feedparser==6.0.11
+
+# 재시도 전략
+tenacity==8.2.3
+
+# AI
+google-generativeai==0.8.3
+
+# 템플릿 렌더링
+Jinja2==3.1.4
+
+# QR코드
+qrcode[pil]==7.4.2
+Pillow==10.3.0
+
+# 환경변수
+python-dotenv==1.0.1
