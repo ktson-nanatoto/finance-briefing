@@ -19,6 +19,9 @@ YAHOO_TICKERS = {
     "gold": "GC=F",
 }
 
+# JPYKRW=X는 1엔 기준이므로 100엔 기준으로 변환
+JPY_SCALE_100 = {"jpy_krw"}
+
 
 def _naver_headers():
     return {
@@ -68,7 +71,14 @@ def fetch() -> dict:
 
     for name, symbol in YAHOO_TICKERS.items():
         try:
-            result[name] = _fetch_yahoo(symbol)
+            data = _fetch_yahoo(symbol)
+            if name in JPY_SCALE_100:
+                data = {
+                    "price": round(data["price"] * 100, 2),
+                    "change": round(data["change"] * 100, 2),
+                    "change_pct": data["change_pct"],
+                }
+            result[name] = data
         except Exception as e:
             result[name] = {"error": str(e)}
 
