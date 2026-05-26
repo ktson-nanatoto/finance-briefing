@@ -207,7 +207,8 @@ def _fetch_naver_index(code: str) -> dict:
 ```yaml
 on:
   schedule:
-    - cron: '30 22 * * *'  # UTC 22:30 = KST 07:30
+    - cron: '30 21 * * *'  # UTC 21:30 = KST 06:30 (모닝 브리핑)
+    - cron: '0 3 * * *'    # UTC 03:00 = KST 12:00 (장중 업데이트)
   workflow_dispatch:         # 수동 실행 허용
 
 jobs:
@@ -225,12 +226,41 @@ jobs:
 - **permissions**: Pages 배포에는 `contents: write`, `pages: write` 권한 필요
 - **cron 표기**: `분 시 일 월 요일` (UTC 기준) — KST는 UTC+9이므로 -9시간
 - **수동 실행**: Actions 탭 → Daily Finance Briefing → Run workflow 버튼
+- **스케줄 첫 활성화**: 새로 만든 워크플로우는 `workflow_dispatch`로 한 번 수동 실행해야 스케줄이 활성화됨
 
 ### 수동 실행 vs Re-run all jobs 차이
 | | 설명 |
 |---|---|
 | **Run workflow** | 최신 코드로 새로 실행 (코드 변경 후 테스트할 때) |
 | **Re-run all jobs** | 이전 실행을 그대로 다시 돌림 (코드 변경 반영 안 됨) |
+
+### 조건부 스텝 — 트리거 이벤트에 따라 분기
+```yaml
+- name: Run crawler
+  if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+  run: python crawler.py
+```
+
+### 스텝 결과를 다음 스텝에 전달 (step outputs)
+```yaml
+- name: Check data changed
+  id: commit          # id 부여
+  run: |
+    if git diff --cached --quiet; then
+      echo "changed=false" >> $GITHUB_OUTPUT
+    else
+      git commit -m "update"
+      echo "changed=true" >> $GITHUB_OUTPUT
+    fi
+
+- name: Notify
+  if: steps.commit.outputs.changed == 'true'   # 앞 스텝 결과 참조
+  run: python notify.py
+```
+
+### GITHUB_TOKEN push는 같은 워크플로우를 재트리거하지 않음
+GitHub Actions 내에서 `GITHUB_TOKEN`으로 push하면 **동일 레포의 다른 워크플로우가 트리거되지 않음** (무한 루프 방지 정책).  
+→ 크롤링 후 커밋 + 배포를 **같은 워크플로우 안**에서 처리해야 하는 이유.
 
 ---
 
@@ -330,3 +360,125 @@ current = ticker.fast_info.last_price
 ```bash
 git pull --rebase origin main && git push origin main
 ```
+
+### 엔화 환율 이상 표시 (100엔 당 9.5원?)
+**증상**: JPY/KRW가 9.5로 표시 — 실제는 950원  
+**원인**: Yahoo Finance `JPYKRW=X` 티커는 **1엔 기준** 반환 (약 9.5). 대시보드 라벨은 "100엔" 기준  
+**해결**: 크롤러에서 price · change에 ×100 적용, change_pct는 그대로 (비율이므로 변환 불필요)
+```python
+if name == "jpy_krw":
+    data["price"] = round(data["price"] * 100, 2)
+    data["change"] = round(data["change"] * 100, 2)
+    # change_pct는 % 단위라 그대로
+```
+
+### 아침/오후 브리핑 구분 (report_type 패턴)
+**배경**: 06:30 실행 시 한국 장 미개장 → 전일 종가 / 12:00 실행 시 장중 실시간 데이터  
+**구현**: `main.py`에서 현재 시각 기준으로 report_type 결정, 프롬프트/알림 분기
+```python
+report_type = "afternoon" if now.hour >= 10 else "morning"
+archive_key = f"{date_str}-{'1200' if report_type == 'afternoon' else '0630'}"
+```
+아카이브 파일명에 시각 포함 이유: 같은 날 두 번 실행 시 오전 파일을 오후가 덮어쓰는 것 방지.
+
+### GitHub Actions 스케줄 지연
+**증상**: 설정한 시간(예: 06:30)보다 30분~1시간 늦게 실행됨  
+**원인**: GitHub의 스케줄 트리거는 서버 부하에 따라 최대 수 시간 지연될 수 있음 (공식 문서 명시)  
+**대응**: 정확한 시각이 중요한 경우 외부 cron 서비스 사용. 일반 브리핑 용도라면 감수.
+
+---
+
+## 12. busan_radar 프로젝트 — 부산 청약 레이더
+
+### 전체 구조
+```
+[호갱노노 API] 부산 청약 목록 (requests, 10~20초)
+       +
+[호갱노노 상세 페이지] 상위 10개 Selenium 크롤링 (2~3분)
+       ↓
+[data.json] 저장
+       ↓ git push
+[GitHub Actions] 자동 실행
+       ↓
+[GitHub Pages] dashboard.html + data.json 배포
+       ↓
+[Telegram] 그룹 알림 발송
+```
+
+### 크롤링 두 가지 모드
+| 모드 | 방식 | 시간 | 가져오는 것 |
+|------|------|------|------------|
+| `--no-detail` | requests API만 | 10~20초 | 단지명, 지역, 청약일, D-day, 상태, 경쟁률 |
+| 풀 크롤링 (기본) | API + Selenium | 2~3분 | 위 항목 + 건설사/시행사, 좌표, 입주시기, 리뷰, 뉴스 |
+
+### GitHub Actions에서 Selenium 사용하기
+ubuntu-latest에 Chrome이 내장되어 있고, selenium 4.x의 `selenium-manager`가 chromedriver를 자동 다운로드.
+
+```yaml
+- name: Install Chrome
+  run: |
+    sudo apt-get update
+    sudo apt-get install -y google-chrome-stable
+
+- name: Install dependencies
+  run: pip install requests selenium
+
+- name: Run crawler
+  timeout-minutes: 10     # Selenium 크롤링 시간 여유 확보
+  run: python crawler.py
+```
+
+Selenium Options에 반드시 포함해야 할 옵션 (CI 환경):
+```python
+options.add_argument("--headless")           # 브라우저 UI 없이 실행
+options.add_argument("--no-sandbox")         # 권한 이슈 방지
+options.add_argument("--disable-dev-shm-usage")  # 메모리 이슈 방지
+```
+
+### GitHub Pages에서 정적 데이터 로드
+Flask 서버 없이 `data.json`을 직접 fetch하도록 수정:
+```javascript
+// 변경 전 (Flask 서버 필요)
+const res = await fetch('/api/data');
+
+// 변경 후 (정적 파일 직접 로드)
+const res = await fetch('data.json');
+```
+
+로컬 Flask 서버와 동시 호환하려면 `/data.json` 라우트 추가:
+```python
+@app.route("/data.json")
+@app.route("/api/data")
+def api_data():
+    return jsonify(load_data())
+```
+
+### 로컬/Pages 환경 분기
+크롤 버튼처럼 서버 기능이 필요한 UI는 로컬에서만 노출:
+```javascript
+(async () => {
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    document.getElementById('btn-crawl').style.display = '';
+  }
+  await fetchData();
+})();
+```
+
+### GitHub Secrets API로 시크릿 등록 자동화
+```python
+from nacl import encoding, public
+import base64
+
+def encrypt_secret(public_key_b64, secret_value):
+    pk = public.PublicKey(public_key_b64.encode(), encoding.Base64Encoder())
+    box = public.SealedBox(pk)
+    return base64.b64encode(box.encrypt(secret_value.encode())).decode()
+
+# 1. 레포 public key 가져오기
+# GET /repos/{owner}/{repo}/actions/secrets/public-key
+
+# 2. 값 암호화 후 등록
+# PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}
+# body: {"encrypted_value": "...", "key_id": "..."}
+```
+GitHub Secrets는 API로 읽을 수 없음 (쓰기만 가능). 값 확인은 `.env` 파일 참조.
