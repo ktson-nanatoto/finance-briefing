@@ -10,7 +10,7 @@ MODEL = "gemini-2.5-flash"
 MAX_TOKENS = 4096
 
 
-def generate_analysis(data: dict) -> dict:
+def generate_analysis(data: dict, report_type: str = "morning") -> dict:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
     model = genai.GenerativeModel(
@@ -23,7 +23,7 @@ def generate_analysis(data: dict) -> dict:
     )
 
     try:
-        response = model.generate_content(build_user_prompt(data))
+        response = model.generate_content(build_user_prompt(data, report_type))
         raw = response.text.strip()
 
         usage = response.usage_metadata

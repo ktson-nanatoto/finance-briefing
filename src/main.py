@@ -110,8 +110,10 @@ def main() -> None:
     now = datetime.now(KST)
     date_str = now.strftime("%Y-%m-%d")
     date_display = now.strftime("%Y년 %m월 %d일 (%a)")
+    report_type = "afternoon" if now.hour >= 10 else "morning"
+    archive_key = f"{date_str}-{'1200' if report_type == 'afternoon' else '0630'}"
 
-    logger.info("===== 브리핑 생성 시작: %s =====", date_str)
+    logger.info("===== 브리핑 생성 시작: %s (%s) =====", date_str, report_type)
 
     try:
         # 1. 데이터 수집
@@ -120,19 +122,19 @@ def main() -> None:
         # 2. 캐시 저장
         save_cache(date_str, {k: v for k, v in data.items() if k != "news"})
 
-        # 3. Claude AI 분석
-        logger.info("Claude API 호출 중")
-        analysis = generate_analysis(data)
+        # 3. AI 분석
+        logger.info("Gemini API 호출 중")
+        analysis = generate_analysis(data, report_type)
         logger.info("AI 분석 완료")
 
         # 4. HTML 렌더링
         html = render_html(data, analysis, date_display, warnings)
 
         # 5. 파일 저장
-        save_output(html, date_str)
+        save_output(html, archive_key)
 
         # 6. 텔레그램 알림 (성공)
-        notify_success(date_display, PAGES_URL, warnings)
+        notify_success(date_display, PAGES_URL, warnings, report_type)
         logger.info("===== 브리핑 생성 완료 =====")
 
     except Exception as e:

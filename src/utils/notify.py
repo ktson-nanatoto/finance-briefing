@@ -26,12 +26,16 @@ def _send_telegram(text: str) -> bool:
         return False
 
 
-def notify_success(date: str, url: str, warnings: list[str]) -> None:
+def notify_success(date: str, url: str, warnings: list[str], report_type: str = "morning") -> None:
+    if report_type == "afternoon":
+        title = "장중 업데이트 발행 완료"
+    else:
+        title = "모닝 브리핑 발행 완료"
     warn_text = ""
     if warnings:
         warn_text = "\n⚠ 데이터 경고:\n" + "\n".join(f"  · {w}" for w in warnings)
     text = (
-        f"✅ <b>재테크 브리핑 발행 완료</b>\n"
+        f"✅ <b>{title}</b>\n"
         f"📅 {date}\n"
         f"🔗 {url}"
         f"{warn_text}"

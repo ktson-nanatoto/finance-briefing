@@ -30,9 +30,20 @@ JSON 외 어떠한 텍스트(마크다운 코드블록 포함)도 출력하지 �
 - 번역 시 금융/경제 용어는 한국 언론에서 통용되는 표현 사용"""
 
 
-def build_user_prompt(data: dict) -> str:
-    today = datetime.now().strftime("%Y년 %m월 %d일")
+def build_user_prompt(data: dict, report_type: str = "morning") -> str:
+    from datetime import timezone, timedelta
+    kst = timezone(timedelta(hours=9))
+    now_kst = datetime.now(kst)
+    today = now_kst.strftime("%Y년 %m월 %d일")
+    current_time = now_kst.strftime("%H:%M")
+
+    if report_type == "afternoon":
+        context = f"현재 시각: {current_time} KST (한국 장중 — KOSPI/KOSDAQ 실시간 데이터 반영)"
+    else:
+        context = f"현재 시각: {current_time} KST (한국 장 개장 전 — 전일 종가 기준)"
+
     return f"""오늘 날짜: {today}
+{context}
 
 ## 수집된 금융 데이터
 {json.dumps(data, ensure_ascii=False, indent=2)}
