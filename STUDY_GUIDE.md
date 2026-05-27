@@ -381,10 +381,24 @@ archive_key = f"{date_str}-{'1200' if report_type == 'afternoon' else '0630'}"
 ```
 아카이브 파일명에 시각 포함 이유: 같은 날 두 번 실행 시 오전 파일을 오후가 덮어쓰는 것 방지.
 
-### GitHub Actions 스케줄 지연
-**증상**: 설정한 시간(예: 06:30)보다 30분~1시간 늦게 실행됨  
-**원인**: GitHub의 스케줄 트리거는 서버 부하에 따라 최대 수 시간 지연될 수 있음 (공식 문서 명시)  
-**대응**: 정확한 시각이 중요한 경우 외부 cron 서비스 사용. 일반 브리핑 용도라면 감수.
+### GitHub Actions 스케줄 지연 / 미실행
+**증상**: 설정한 시간에 워크플로우가 실행되지 않거나, 수 시간 지연됨  
+**원인 1**: GitHub 서버 부하 — 스케줄 트리거는 최대 수 시간 지연 가능 (공식 문서 명시)  
+**원인 2**: 새 스케줄 첫 1~2일 — cron을 새로 만들거나 변경한 직후에는 스킵되는 경우 잦음  
+**확인 방법**: GitHub API로 최근 실행 이력 조회
+```bash
+curl -s -H "Authorization: token $TOKEN" \
+  "https://api.github.com/repos/{owner}/{repo}/actions/runs?per_page=5"
+```
+**대응**: `workflow_dispatch`로 수동 트리거 후 다음 날부터 정상 여부 확인. 이틀 이상 지속되면 외부 cron 서비스(예: cron-job.org)로 보완.
+
+### GitHub Pages CDN 캐시로 인한 구 버전 표시
+**증상**: 워크플로우 성공 후에도 브라우저에서 이전 날짜·이전 데이터가 보임  
+**원인**: GitHub Pages는 CDN을 통해 서빙되어 배포 직후에도 캐시된 이전 버전이 보일 수 있음  
+**해결**:
+- 모바일: 브라우저 새로고침 길게 누르기
+- PC: `Ctrl+Shift+R` (캐시 무시 강제 새로고침)
+- 확인 방법: HTML 파일 내용은 `output/archive/` 에서 직접 확인 가능
 
 ---
 
