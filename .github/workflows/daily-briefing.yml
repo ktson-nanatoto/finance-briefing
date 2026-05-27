@@ -1,12 +1,7 @@
 name: Daily Finance Briefing
 
 on:
-  schedule:
-    # 매일 06:30 KST = UTC 21:30 (전날)
-    - cron: '30 21 * * *'
-    # 매일 12:00 KST = UTC 03:00
-    - cron: '0 3 * * *'
-  workflow_dispatch:  # 수동 실행 허용
+  workflow_dispatch:
 
 permissions:
   contents: write
