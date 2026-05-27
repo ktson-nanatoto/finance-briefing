@@ -392,6 +392,31 @@ curl -s -H "Authorization: token $TOKEN" \
 ```
 **대응**: `workflow_dispatch`로 수동 트리거 후 다음 날부터 정상 여부 확인. 이틀 이상 지속되면 외부 cron 서비스(예: cron-job.org)로 보완.
 
+### 청약 알림이 매일 발송되는 문제 (volatile 필드)
+**증상**: 데이터가 실질적으로 변하지 않았는데 매일 Telegram 알림이 옴  
+**원인**: `viewCount`(방문수)·`alarmCount`(알람수)는 매일 바뀌어 `git diff`가 항상 "변경됨"으로 감지  
+**해결**: 비교 시 volatile 필드를 제외한 서명(signature) 파일을 별도 관리
+```python
+VOLATILE = {"viewCount", "alarmCount"}
+
+def canonical(apts):
+    return json.dumps(
+        sorted(
+            [{k: v for k, v in a.items() if k not in VOLATILE} for a in apts],
+            key=lambda a: a.get("hash", "")
+        ),
+        ensure_ascii=False, sort_keys=True
+    )
+
+sig = canonical(data.get("apts", []))
+prev = Path(".apt_signature").read_text() if Path(".apt_signature").exists() else ""
+changed = sig != prev
+Path(".apt_signature").write_text(sig)
+```
+- `.apt_signature` 파일을 레포에 커밋해두고 매 실행마다 이전 서명과 비교
+- 알림 기준: 새 단지 추가 / 상태 변경 / 청약일 변경 / 경쟁률 갱신
+- 무시 기준: viewCount · alarmCount 변동
+
 ### GitHub Pages CDN 캐시로 인한 구 버전 표시
 **증상**: 워크플로우 성공 후에도 브라우저에서 이전 날짜·이전 데이터가 보임  
 **원인**: GitHub Pages는 CDN을 통해 서빙되어 배포 직후에도 캐시된 이전 버전이 보일 수 있음  
@@ -476,6 +501,24 @@ def api_data():
   }
   await fetchData();
 })();
+```
+
+### 의미 있는 변경만 감지하는 서명(signature) 패턴
+매번 전체 파일을 비교하면 volatile 필드 때문에 항상 "변경됨"이 뜨는 문제를 방지:
+```
+data.json (전체 저장) ← 크롤링 결과 원본
+.apt_signature       ← volatile 제외한 비교용 해시 (레포에 커밋)
+```
+워크플로우 흐름:
+```
+크롤러 실행 → data.json 생성
+       ↓
+canonical() 로 volatile 필드 제거 + 정렬 → 현재 서명 계산
+       ↓
+.apt_signature (이전 서명) 과 비교
+       ↓
+다름 → changed=true → 커밋 + Telegram 알림
+같음 → changed=false → 커밋만 (알림 없음)
 ```
 
 ### GitHub Secrets API로 시크릿 등록 자동화
