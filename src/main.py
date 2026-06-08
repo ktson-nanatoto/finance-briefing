@@ -123,7 +123,7 @@ def main() -> None:
         save_cache(date_str, {k: v for k, v in data.items() if k != "news"})
 
         # 3. AI 분석
-        logger.info("Gemini API 호출 중")
+        logger.info("Groq API 호출 중")
         analysis = generate_analysis(data, report_type)
         logger.info("AI 분석 완료")
 

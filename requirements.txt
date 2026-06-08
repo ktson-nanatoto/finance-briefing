@@ -8,7 +8,7 @@ feedparser==6.0.11
 tenacity==8.2.3
 
 # AI
-google-generativeai==0.8.3
+groq
 
 # 주식 데이터
 yfinance>=0.2.40
