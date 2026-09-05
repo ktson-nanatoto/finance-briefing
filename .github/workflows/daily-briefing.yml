@@ -1,6 +1,9 @@
 name: Daily Finance Briefing
 
 on:
+  schedule:
+    - cron: '5 0 * * 1-5'   # 09:05 KST (장 시작 직후, 평일)
+    - cron: '0 7 * * 1-5'   # 16:00 KST (장 마감 직후, 평일)
   workflow_dispatch:
 
 permissions:
