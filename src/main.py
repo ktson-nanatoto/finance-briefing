@@ -105,6 +105,17 @@ def save_output(html: str, date_str: str) -> None:
     shutil.copy(index_path, archive_path)
     logger.info("저장 완료: %s, %s", index_path, archive_path)
 
+    # 30일 경과 아카이브 삭제
+    cutoff = datetime.now(KST) - timedelta(days=30)
+    for old in ARCHIVE_DIR.glob("*.html"):
+        try:
+            file_date = datetime.strptime(old.stem[:10], "%Y-%m-%d").replace(tzinfo=KST)
+            if file_date < cutoff:
+                old.unlink()
+                logger.info("오래된 아카이브 삭제: %s", old.name)
+        except ValueError:
+            pass  # 날짜 파싱 불가 파일은 건너뜀
+
 
 def main() -> None:
     now = datetime.now(KST)
