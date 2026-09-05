@@ -6,7 +6,7 @@ from src.utils.logger import get_logger
 
 logger = get_logger("generate")
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "qwen/qwen3.8-27b"
 MAX_TOKENS = 4096
 
 

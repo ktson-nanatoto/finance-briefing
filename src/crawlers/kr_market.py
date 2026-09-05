@@ -1,7 +1,9 @@
+import os
 import random
 import time
 import requests
 import yfinance as yf
+from datetime import datetime, timedelta
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 USER_AGENTS = [
@@ -13,14 +15,16 @@ NAVER_INDEX_URL = "https://m.stock.naver.com/api/index/{code}/basic"
 INDEX_CODES = {"kospi": "KOSPI", "kosdaq": "KOSDAQ"}
 
 YAHOO_TICKERS = {
-    "usd_krw": "KRW=X",
-    "jpy_krw": "JPYKRW=X",
     "oil_wti": "CL=F",
     "gold": "GC=F",
 }
 
-# JPYKRW=X는 1엔 기준이므로 100엔 기준으로 변환
-JPY_SCALE_100 = {"jpy_krw"}
+# 한국은행 ECOS 환율 (731Y001, 매매기준율, 일별)
+ECOS_BASE = "https://ecos.bok.or.kr/api/StatisticSearch"
+ECOS_FX = {
+    "usd_krw": "0000001",  # 원/미국달러(매매기준율)
+    "jpy_krw": "0000002",  # 원/일본엔(100엔)
+}
 
 
 def _naver_headers():
@@ -59,6 +63,35 @@ def _fetch_yahoo(symbol: str) -> dict:
     }
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=5, max=20))
+def _fetch_ecos_fx(item_code: str) -> dict:
+    api_key = os.environ.get("ECOS_API_KEY", "")
+    if not api_key:
+        return {"error": "ECOS_API_KEY not set"}
+    today = datetime.now().strftime("%Y%m%d")
+    start = (datetime.now() - timedelta(days=14)).strftime("%Y%m%d")
+    url = f"{ECOS_BASE}/{api_key}/json/kr/1/10/731Y001/D/{start}/{today}/{item_code}"
+    resp = requests.get(url, timeout=10)
+    resp.raise_for_status()
+    rows = sorted(
+        resp.json().get("StatisticSearch", {}).get("row", []),
+        key=lambda x: x["TIME"],
+        reverse=True,
+    )
+    if len(rows) < 2:
+        raise ValueError(f"ECOS 환율 데이터 부족: {item_code}")
+    latest, previous = rows[0], rows[1]
+    value = float(latest["DATA_VALUE"])
+    prev_value = float(previous["DATA_VALUE"])
+    change = round(value - prev_value, 2)
+    return {
+        "price": value,
+        "change": change,
+        "change_pct": round(change / prev_value * 100, 2),
+        "date": latest["TIME"],
+    }
+
+
 def fetch() -> dict:
     result = {}
 
@@ -69,16 +102,15 @@ def fetch() -> dict:
         except Exception as e:
             result[name] = {"error": str(e)}
 
+    for name, item_code in ECOS_FX.items():
+        try:
+            result[name] = _fetch_ecos_fx(item_code)
+        except Exception as e:
+            result[name] = {"error": str(e)}
+
     for name, symbol in YAHOO_TICKERS.items():
         try:
-            data = _fetch_yahoo(symbol)
-            if name in JPY_SCALE_100:
-                data = {
-                    "price": round(data["price"] * 100, 2),
-                    "change": round(data["change"] * 100, 2),
-                    "change_pct": data["change_pct"],
-                }
-            result[name] = data
+            result[name] = _fetch_yahoo(symbol)
         except Exception as e:
             result[name] = {"error": str(e)}
 
