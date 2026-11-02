@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import time
@@ -5,6 +6,8 @@ import requests
 import yfinance as yf
 from datetime import datetime, timedelta
 from tenacity import retry, stop_after_attempt, wait_exponential
+
+logger = logging.getLogger(__name__)
 
 USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -18,6 +21,13 @@ YAHOO_TICKERS = {
     "oil_wti": "CL=F",
     "gold": "GC=F",
 }
+
+# ECOS 실패 시 Naver Finance fallback reutersCode
+NAVER_FX_FALLBACK = {
+    "usd_krw": "FX_USDKRW",
+}
+
+NAVER_PRODUCT_DETAIL_URL = "https://m.stock.naver.com/front-api/marketIndex/productDetail"
 
 # 한국은행 ECOS 환율 (731Y001, 매매기준율, 일별)
 ECOS_BASE = "https://ecos.bok.or.kr/api/StatisticSearch"
@@ -64,17 +74,46 @@ def _fetch_yahoo(symbol: str) -> dict:
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=5, max=20))
+def _fetch_naver_fx(reuters_code: str) -> dict:
+    """Naver Finance에서 환율 현재가 수집 (ECOS fallback용)."""
+    resp = requests.get(
+        NAVER_PRODUCT_DETAIL_URL,
+        params={"category": "exchange", "reutersCode": reuters_code},
+        headers=_naver_headers(),
+        timeout=10,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if not data.get("isSuccess"):
+        raise ValueError(f"Naver FX API 실패: {data.get('message', 'unknown')}")
+    result = data["result"]
+    price = float(result["closePrice"].replace(",", ""))
+    change = float(result["fluctuations"].replace(",", ""))
+    change_pct = float(result["fluctuationsRatio"])
+    # fluctuationsType.name이 FALLING이면 음수로 변환
+    if result.get("fluctuationsType", {}).get("name") == "FALLING":
+        change = -abs(change)
+        change_pct = -abs(change_pct)
+    return {"price": price, "change": change, "change_pct": change_pct}
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=5, max=20))
 def _fetch_ecos_fx(item_code: str) -> dict:
     api_key = os.environ.get("ECOS_API_KEY", "")
     if not api_key:
-        return {"error": "ECOS_API_KEY not set"}
+        raise ValueError("ECOS_API_KEY not set")  # return 대신 raise → fetch()에서 fallback 처리
     today = datetime.now().strftime("%Y%m%d")
     start = (datetime.now() - timedelta(days=14)).strftime("%Y%m%d")
     url = f"{ECOS_BASE}/{api_key}/json/kr/1/10/731Y001/D/{start}/{today}/{item_code}"
     resp = requests.get(url, timeout=10)
     resp.raise_for_status()
+    data = resp.json()
+    # ECOS 오류 응답: {"RESULT": {"CODE": "...", "MESSAGE": "..."}}
+    if "RESULT" in data:
+        msg = data["RESULT"].get("MESSAGE", "Unknown ECOS error")
+        raise ValueError(f"ECOS API 오류: {msg}")
     rows = sorted(
-        resp.json().get("StatisticSearch", {}).get("row", []),
+        data.get("StatisticSearch", {}).get("row", []),
         key=lambda x: x["TIME"],
         reverse=True,
     )
@@ -106,7 +145,15 @@ def fetch() -> dict:
         try:
             result[name] = _fetch_ecos_fx(item_code)
         except Exception as e:
-            result[name] = {"error": str(e)}
+            reuters_code = NAVER_FX_FALLBACK.get(name)
+            if reuters_code:
+                logger.warning("ECOS 실패(%s): %s → Naver Finance(%s) fallback", name, e, reuters_code)
+                try:
+                    result[name] = _fetch_naver_fx(reuters_code)
+                except Exception as e2:
+                    result[name] = {"error": str(e2)}
+            else:
+                result[name] = {"error": str(e)}
 
     for name, symbol in YAHOO_TICKERS.items():
         try:
