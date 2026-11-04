@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>경제뉴스 모닝 브리핑 — 2026년 11월 04일 (Wed)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --text: #1a1a2e;
+      --text-sub: #555577;
+      --border: #e2e8f0;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --up-text: #3B6D11;
+      --up-bg: #EAF3DE;
+      --down-text: #A32D2D;
+      --down-bg: #FCEBEB;
+      --insight-bg: #E6F1FB;
+      --insight-text: #0C447C;
+      --badge-open: #EAF3DE;
+      --badge-open-text: #3B6D11;
+      --badge-close: #f0f0f0;
+      --badge-close-text: #555577;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1117;
+        --card-bg: #1e2130;
+        --text: #e8eaf0;
+        --text-sub: #9099b0;
+        --border: #2d3250;
+        --shadow: 0 2px 12px rgba(0,0,0,0.3);
+        --up-text: #7dba3f;
+        --up-bg: #1c2e10;
+        --down-text: #e06060;
+        --down-bg: #2e1010;
+        --insight-bg: #0d1e35;
+        --insight-text: #80b8f0;
+        --badge-open: #1c2e10;
+        --badge-open-text: #7dba3f;
+        --badge-close: #252535;
+        --badge-close-text: #9099b0;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+    .wrap { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    /* 헤더 */
+    .header { text-align: center; }
+    .header .date { font-size: 13px; color: var(--text-sub); margin-bottom: 6px; }
+    .header .title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .badge-open { background: var(--badge-open); color: var(--badge-open-text); }
+    .badge-close { background: var(--badge-close); color: var(--badge-close-text); }
+
+    /* 핵심 이슈 */
+    .headline { font-size: 15px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; }
+    .issue-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .issue-list li {
+      font-size: 13px;
+      line-height: 1.5;
+      padding-left: 14px;
+      position: relative;
+      color: var(--text-sub);
+    }
+    .issue-list li::before { content: "•"; position: absolute; left: 0; color: var(--insight-text); }
+
+    /* 지표 그리드 */
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric-item { padding: 10px; border-radius: 8px; background: var(--bg); }
+    .metric-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
+    .metric-value { font-size: 16px; font-weight: 700; }
+    .metric-change { font-size: 12px; margin-top: 2px; }
+    .up { color: var(--up-text); }
+    .down { color: var(--down-text); }
+    .neutral { color: var(--text-sub); }
+
+    /* 2단 레이아웃 */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .two-col .card { margin: 0; }
+
+    /* 뉴스 목록 */
+    .news-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .news-list li { font-size: 13px; line-height: 1.5; }
+    .news-source {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--insight-bg);
+      color: var(--insight-text);
+      margin-bottom: 2px;
+    }
+
+    /* 인사이트 */
+    .insight-card { background: var(--insight-bg); border-color: transparent; }
+    .insight-card .card-title { color: var(--insight-text); }
+    .insight-text { font-size: 14px; line-height: 1.7; color: var(--insight-text); margin-bottom: 10px; }
+    .risk-label { font-size: 11px; font-weight: 700; color: var(--down-text); margin-bottom: 4px; }
+    .risk-text { font-size: 13px; color: var(--text-sub); line-height: 1.5; }
+
+    /* 경고 배너 */
+    .warning-banner {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #7a5c00;
+    }
+
+    /* 면책 문구 */
+    .disclaimer { font-size: 11px; color: var(--text-sub); text-align: center; line-height: 1.6; padding: 8px 0; }
+
+    /* QR */
+    .qr-wrap { text-align: center; padding: 8px 0; }
+    .qr-wrap img { width: 80px; height: 80px; }
+    .qr-label { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 1. 헤더 -->
+  <div class="card header">
+    <div class="date">2026년 11월 04일 (Wed)</div>
+    <div class="title">경제뉴스 모닝 브리핑</div>
+    <span class="badge badge-open">
+      장중
+    </span>
+  </div>
+
+  
+
+  <!-- 2. 핵심 이슈 -->
+  <div class="card">
+    <div class="card-title">오늘의 핵심 이슈</div>
+    <div class="headline">미국 중간선거 민주당 승리로 국채금리 하락, 국내 증시 동반 상승</div>
+    <ul class="issue-list">
+      
+      <li>미국 중간선거에서 민주당이 승리를 거두며 국채금리가 하락하고 주식 선물 매도세가 발생함</li>
+      
+      <li>블랙스톤이 AI 인프라 구축을 위한 지분 투자 확대를 촉구하고 있음</li>
+      
+      <li>국내 증시에서 KOSDAQ이 1.5% 상승하며 기술주 강세를 보임</li>
+      
+    </ul>
+  </div>
+
+  <!-- 3. 핵심 지표 -->
+  <div class="card">
+    <div class="card-title">핵심 지표</div>
+    <div class="metrics-grid">
+      
+      <div class="metric-item">
+        <div class="metric-label">USD/KRW</div>
+        <div class="metric-value">1342.1원</div>
+        <div class="metric-change down">
+          ▼
+          3.9 (0.29%)
+        </div>
+      </div>
+      
+
+      
+      <div class="metric-item">
+        <div class="metric-label">WTI 원유</div>
+        <div class="metric-value">$96.4</div>
+        <div class="metric-change up">
+          ▲
+          1.25 (1.31%)
+        </div>
+      </div>
+      
+
+      
+      <div class="metric-item">
+        <div class="metric-label">금</div>
+        <div class="metric-value">$4029.3999</div>
+        <div class="metric-change up">
+          ▲
+          62.7998 (1.58%)
+        </div>
+      </div>
+      
+
+      
+    </div>
+  </div>
+
+  <!-- 4. 미국 증시 + 한국 증시 -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">미국 증시</div>
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">S&P 500</div>
+        <div class="metric-value" style="font-size:14px">7568.92</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          0.35%
+        </div>
+      </div>
+      
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">NASDAQ</div>
+        <div class="metric-value" style="font-size:14px">25372.01</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          0.8%
+        </div>
+      </div>
+      
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">DOW</div>
+        <div class="metric-value" style="font-size:14px">51786.72</div>
+        <div class="metric-change down" style="font-size:11px">
+          ▼
+          0.39%
+        </div>
+      </div>
+      
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">VIX</div>
+        <div class="metric-value" style="font-size:14px">20.83</div>
+        <div class="metric-change down" style="font-size:11px">
+          ▼
+          1.61%
+        </div>
+      </div>
+      
+      
+      
+      <div style="font-size:12px; color:var(--text-sub); margin-top:8px; line-height:1.5">S&P 500은 ▲0.35% 상승했으나 다우존스는 ▼0.39% 하락하며 혼조세. VIX는 ▼1.61% 하락하며 변동성 완화. 민주당 승리로 인한 정책 불확실성으로 안전자산 선호 심리 확산.</div>
+      
+    </div>
+
+    <div class="card">
+      <div class="card-title">한국 증시</div>
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">KOSPI</div>
+        <div class="metric-value" style="font-size:14px">5683.8</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          0.62%
+        </div>
+      </div>
+      
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">KOSDAQ</div>
+        <div class="metric-value" style="font-size:14px">714.95</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          1.5%
+        </div>
+      </div>
+      
+      
+      
+      <div style="font-size:12px; color:var(--text-sub); margin-top:8px; line-height:1.5">KOSPI는 ▲0.62%, KOSDAQ은 ▲1.5% 상승하며 동반 강세. 원/달러 환율은 ▼0.29% 하락(1342.1원)하며 원화 강세 흐름. AI 전력망 및 전기차 관련 이슈로 기술주 매수세 유입.</div>
+      
+    </div>
+  </div>
+
+  <!-- 5. 금리 동향 + 부동산 -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">금리 동향</div>
+      
+      
+      
+      
+      <div style="font-size:12px; color:var(--text-sub); margin-top:8px; line-height:1.5">WTI 유가는 ▲1.31% 상승(96.4달러), 금은 ▲1.58% 급등(4029.4달러)하며 안전자산 및 원자재 강세. 미국 국채금리는 중간선거 결과로 하락세. 금리/인플레이션 데이터는 API 오류로 미반영.</div>
+      
+    </div>
+
+    
+    <div class="card">
+      <div class="card-title">부동산</div>
+      
+      <div style="font-size:12px; color:var(--text-sub); margin-bottom:8px; line-height:1.5">강남 재건축은 세금·분담금 부담으로 평형 축소 가능성. 20년 지분적립형 주택 첫 공급으로 분양가 부담 완화 기대. 전세 수요는 고금리·대출 규제 속에서도 유지되는 양상.</div>
+      
+      <ul class="news-list">
+        
+        <li><a href="https://n.news.naver.com/mnews/article/448/0000648924" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">"짓는 3년보다 사는 40년"…아파트 관리회사 'KES' 출범</a></li>
+        
+        <li><a href="https://n.news.naver.com/mnews/article/648/0000052283" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">'10억 집에 8억 대출 있어도' 전세 들어간다</a></li>
+        
+        <li><a href="https://n.news.naver.com/mnews/article/003/0014301443" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">치솟는 세금·분담금 부담…강남 재건축 평형 작아지나</a></li>
+        
+      </ul>
+    </div>
+    
+  </div>
+
+  <!-- 6. 주요 뉴스 -->
+  
+  <div class="card">
+    <div class="card-title">주요 뉴스</div>
+    <ul class="news-list">
+      
+      
+      <li>
+        <span class="news-source">국내</span>
+        <a href="https://n.news.naver.com/mnews/article/030/0003482033" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">한전 '2026 BIXPO' 개막…AI 전력망·HVDC 기술 총출동[르포]</a>
+      </li>
+      
+      
+      
+      <li>
+        <span class="news-source">국내</span>
+        <a href="https://n.news.naver.com/mnews/article/014/0005599272" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">현대차, 한국·브라질 잇는 예술 협업…백남준 작품 재조명</a>
+      </li>
+      
+      
+      
+      <li>
+        <span class="news-source">국내</span>
+        <a href="https://n.news.naver.com/mnews/article/018/0006403585" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">김동선, 1838억 공개매수 마무리…한화M&S 최대주주 등극</a>
+      </li>
+      
+      
+      
+      
+      <li>
+        <span class="news-source">CNBC</span>
+        <a href="https://www.cnbc.com/2026/11/03/treasury-yields-fall-as-democrats-win-big-in-us-midterm-elections.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">미국 중간선거 민주당 대승으로 주식 매도세 속 안전자산인 국채로 자금 유입, 국채금리 하락</a>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">Treasury yields fall as investors crowd into bonds for safety amid election stock sell-off</div>
+      </li>
+      
+      <li>
+        <span class="news-source">CNBC</span>
+        <a href="https://www.cnbc.com/2026/11/03/equity-ai-debt-blackstone-pimco-financing.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">블랙스톤 회장, 부채 리스크 확대 속 AI 인프라 구축에 지분 투자 확대 촉구</a>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">Blackstone president calls for more equity to fund AI buildout as debt risks mount</div>
+      </li>
+      
+      <li>
+        <span class="news-source">CNBC</span>
+        <a href="https://www.cnbc.com/2026/11/02/texas-governor-prediction-markets-abbott-hinojosa.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">텍사스 주지사 선거 예측시장에서 격차 좁혀지나, 여전히 아봇 후보 우세</a>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">Texas governor race tightens in prediction markets, but Abbott remains favored</div>
+      </li>
+      
+      <li>
+        <span class="news-source">CNBC</span>
+        <a href="https://www.cnbc.com/2026/11/02/stock-market-after-midterm-elections-sp-500-history.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">중간선거 후 증시: S&P 500 역사적 패턴은 어떤가</a>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">Stock market after midterm elections: What S&P 500 history shows</div>
+      </li>
+      
+      
+    </ul>
+  </div>
+  
+
+  <!-- 7. 인사이트 -->
+  <div class="card insight-card">
+    <div class="card-title">오늘의 인사이트</div>
+    <div class="insight-text">미국 중간선거 민주당 승리는 단기적으로 국채금리 하락과 안전자산 선호를 유발하지만, 역사적으로 중간선거 후 S&P 500은 강세를 보여 장기적 기회로 해석 가능. 국내에서는 AI 전력망 및 전기차 세액공제 재검토 이슈가 기술주 모멘텀을 강화. 금 가격 급등은 지정학적 리스크 및 인플레이션 헤지 수요 반영.</div>
+    
+    <div class="risk-label">⚠ 주요 리스크</div>
+    <div class="risk-text">미국 중간선거 후 정책 불확실성 및 AI 인프라 관련 부채 집중 리스크. 원자재 가격 급등에 따른 인플레이션 재점화 가능성. 암호화폐 해킹 사건으로 인한 디지털 자산 신뢰도 하락.</div>
+    
+  </div>
+
+  <!-- QR 코드 -->
+  
+  <div class="card qr-wrap">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJQAAACUAQAAAABdRz15AAABP0lEQVR4nM2WQXLEMAgE+QH//+X8gNAgb7YqN48O0cErtavWmBnAUX+W4l+xiMiq6G0oOZisQVYfVMrk4LLIQ2IPN1hW5NldYeqVpbrB+rXJZcxjfvPyliHLZ33p9pax2BUaffnqLUs8JLWBOgGz91gfmtfaiDsmq3UPhiSjUSbry6Sh/1vcTZdxaYsXcpEKk7WDcCQFIwzkMpThvaWRS2WyINL1Y/8ezQ3WIRNsy93PQH+TTTkrNt7jIYeRVGyETKJsTCaCpWpysrEWMFgd4ad3fzz0ngUPmIyi+ulhBmt1Yvxdo9f4yWK4e2uZJJw+bjBKjwFKE2OcmoyFh9reODLTZHHMWDPwTg8z2DZCqoWxFz7bcDex03kuMMaU+LJZT9qMkTcT9Jl5BptvpNNrnh5msJnxqiduuez29+ld9gNu3s48eba2hQAAAABJRU5ErkJggg==" alt="브리핑 QR코드" />
+    <div class="qr-label">카카오톡 오픈채팅 공유용 QR</div>
+  </div>
+  
+
+  <!-- 8. 면책 문구 -->
+  <div class="disclaimer">
+    본 브리핑은 투자 참고 자료이며 투자 권유가 아닙니다.<br>
+    투자 손실에 대한 책임은 투자자 본인에게 있습니다.<br>
+    <small>Generated 2026년 11월 04일 (Wed) · finance-briefing</small>
+  </div>
+
+</div>
+</body>
+</html>
