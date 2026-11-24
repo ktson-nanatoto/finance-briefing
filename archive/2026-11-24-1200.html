@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>경제뉴스 모닝 브리핑 — 2026년 11월 24일 (Tue)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --text: #1a1a2e;
+      --text-sub: #555577;
+      --border: #e2e8f0;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --up-text: #3B6D11;
+      --up-bg: #EAF3DE;
+      --down-text: #A32D2D;
+      --down-bg: #FCEBEB;
+      --insight-bg: #E6F1FB;
+      --insight-text: #0C447C;
+      --badge-open: #EAF3DE;
+      --badge-open-text: #3B6D11;
+      --badge-close: #f0f0f0;
+      --badge-close-text: #555577;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1117;
+        --card-bg: #1e2130;
+        --text: #e8eaf0;
+        --text-sub: #9099b0;
+        --border: #2d3250;
+        --shadow: 0 2px 12px rgba(0,0,0,0.3);
+        --up-text: #7dba3f;
+        --up-bg: #1c2e10;
+        --down-text: #e06060;
+        --down-bg: #2e1010;
+        --insight-bg: #0d1e35;
+        --insight-text: #80b8f0;
+        --badge-open: #1c2e10;
+        --badge-open-text: #7dba3f;
+        --badge-close: #252535;
+        --badge-close-text: #9099b0;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+    .wrap { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    /* 헤더 */
+    .header { text-align: center; }
+    .header .date { font-size: 13px; color: var(--text-sub); margin-bottom: 6px; }
+    .header .title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .badge-open { background: var(--badge-open); color: var(--badge-open-text); }
+    .badge-close { background: var(--badge-close); color: var(--badge-close-text); }
+
+    /* 핵심 이슈 */
+    .headline { font-size: 15px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; }
+    .issue-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .issue-list li {
+      font-size: 13px;
+      line-height: 1.5;
+      padding-left: 14px;
+      position: relative;
+      color: var(--text-sub);
+    }
+    .issue-list li::before { content: "•"; position: absolute; left: 0; color: var(--insight-text); }
+
+    /* 지표 그리드 */
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric-item { padding: 10px; border-radius: 8px; background: var(--bg); }
+    .metric-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
+    .metric-value { font-size: 16px; font-weight: 700; }
+    .metric-change { font-size: 12px; margin-top: 2px; }
+    .up { color: var(--up-text); }
+    .down { color: var(--down-text); }
+    .neutral { color: var(--text-sub); }
+
+    /* 2단 레이아웃 */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .two-col .card { margin: 0; }
+
+    /* 뉴스 목록 */
+    .news-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .news-list li { font-size: 13px; line-height: 1.5; }
+    .news-source {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--insight-bg);
+      color: var(--insight-text);
+      margin-bottom: 2px;
+    }
+
+    /* 인사이트 */
+    .insight-card { background: var(--insight-bg); border-color: transparent; }
+    .insight-card .card-title { color: var(--insight-text); }
+    .insight-text { font-size: 14px; line-height: 1.7; color: var(--insight-text); margin-bottom: 10px; }
+    .risk-label { font-size: 11px; font-weight: 700; color: var(--down-text); margin-bottom: 4px; }
+    .risk-text { font-size: 13px; color: var(--text-sub); line-height: 1.5; }
+
+    /* 경고 배너 */
+    .warning-banner {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #7a5c00;
+    }
+
+    /* 면책 문구 */
+    .disclaimer { font-size: 11px; color: var(--text-sub); text-align: center; line-height: 1.6; padding: 8px 0; }
+
+    /* QR */
+    .qr-wrap { text-align: center; padding: 8px 0; }
+    .qr-wrap img { width: 80px; height: 80px; }
+    .qr-label { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 1. 헤더 -->
+  <div class="card header">
+    <div class="date">2026년 11월 24일 (Tue)</div>
+    <div class="title">경제뉴스 모닝 브리핑</div>
+    <span class="badge badge-open">
+      장중
+    </span>
+  </div>
+
+  
+  <!-- 데이터 수집 경고 배너 -->
+  <div class="warning-banner">
+    ⚠️ 일부 데이터 수집에 문제가 있습니다. 수치를 직접 확인해 주세요.<br>
+    <small>이상치 감지: us_market.vix 변동률 -25.83% (임계값 ±20.0%)</small><br>
+  </div>
+  
+
+  <!-- 2. 핵심 이슈 -->
+  <div class="card">
+    <div class="card-title">오늘의 핵심 이슈</div>
+    <div class="headline">젠슨 황 복귀 효과로 미·한 증시 동반 급등, VIX 25% 급락</div>
+    <ul class="issue-list">
+      
+      <li>젠슨 황 복귀로 AI 섹터 회복 기대감 및 매수 사이드카 발동</li>
+      
+      <li>뉴욕증시 3대 지수 급등 및 VIX 25.83% 하락</li>
+      
+      <li>연준 윌리엄스 총재의 금리 인상 시사 발언</li>
+      
+    </ul>
+  </div>
+
+  <!-- 3. 핵심 지표 -->
+  <div class="card">
+    <div class="card-title">핵심 지표</div>
+    <div class="metrics-grid">
+      
+      <div class="metric-item">
+        <div class="metric-label">USD/KRW</div>
+        <div class="metric-value">1344.8원</div>
+        <div class="metric-change up">
+          ▲
+          2.3 (0.17%)
+        </div>
+      </div>
+      
+
+      
+      <div class="metric-item">
+        <div class="metric-label">WTI 원유</div>
+        <div class="metric-value">$80.01</div>
+        <div class="metric-change up">
+          ▲
+          0.22 (0.28%)
+        </div>
+      </div>
+      
+
+      
+      <div class="metric-item">
+        <div class="metric-label">금</div>
+        <div class="metric-value">$3628.8999</div>
+        <div class="metric-change down">
+          ▼
+          1.3 (0.04%)
+        </div>
+      </div>
+      
+
+      
+    </div>
+  </div>
+
+  <!-- 4. 미국 증시 + 한국 증시 -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">미국 증시</div>
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">S&P 500</div>
+        <div class="metric-value" style="font-size:14px">7237.17</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          4.61%
+        </div>
+      </div>
+      
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">NASDAQ</div>
+        <div class="metric-value" style="font-size:14px">24089.56</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          6.35%
+        </div>
+      </div>
+      
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">DOW</div>
+        <div class="metric-value" style="font-size:14px">49595.31</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          2.93%
+        </div>
+      </div>
+      
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">VIX</div>
+        <div class="metric-value" style="font-size:14px">26.62</div>
+        <div class="metric-change down" style="font-size:11px">
+          ▼
+          25.83%
+        </div>
+      </div>
+      
+      
+      
+      <div style="font-size:12px; color:var(--text-sub); margin-top:8px; line-height:1.5">나스닥 ▲6.35%, S&P500 ▲4.61% 등 주요 지수가 급등하며 위험 선호 심리가 회복되었습니다.</div>
+      
+    </div>
+
+    <div class="card">
+      <div class="card-title">한국 증시</div>
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">KOSPI</div>
+        <div class="metric-value" style="font-size:14px">5006.03</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          6.32%
+        </div>
+      </div>
+      
+      
+      
+      
+      <div style="margin-bottom:8px">
+        <div class="metric-label">KOSDAQ</div>
+        <div class="metric-value" style="font-size:14px">665.88</div>
+        <div class="metric-change up" style="font-size:11px">
+          ▲
+          4.79%
+        </div>
+      </div>
+      
+      
+      
+      <div style="font-size:12px; color:var(--text-sub); margin-top:8px; line-height:1.5">코스피 ▲6.32%, 코스닥 ▲4.79% 상승으로 젠슨 황 효과에 힘입어 강한 반등세를 보였습니다.</div>
+      
+    </div>
+  </div>
+
+  <!-- 5. 금리 동향 + 부동산 -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">금리 동향</div>
+      
+      
+      
+      
+      <div style="font-size:12px; color:var(--text-sub); margin-top:8px; line-height:1.5">원/달러 환율 1,344.8원(▲0.17%), WTI 80.01달러(▲0.28%), 금 3,628.9달러(▼0.04%)로 안정적입니다.</div>
+      
+    </div>
+
+    
+    <div class="card">
+      <div class="card-title">부동산</div>
+      
+      <div style="font-size:12px; color:var(--text-sub); margin-bottom:8px; line-height:1.5">재초환 제도의 딜레마가 깊어지는 가운데, 대통령도 집값 급등 및 급락에 대비해야 한다고 강조했습니다.</div>
+      
+      <ul class="news-list">
+        
+        <li><a href="https://n.news.naver.com/mnews/article/018/0006414832" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">“없애자니 집값이, 두자니 공급이”…깊어지는 재초환 딜레마</a></li>
+        
+        <li><a href="https://n.news.naver.com/mnews/ranking/article/024/0000109856?ntype=RANKING" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">[속보] 李대통령 “집값 급등 이어 급락에도 대비해야”</a></li>
+        
+      </ul>
+    </div>
+    
+  </div>
+
+  <!-- 6. 주요 뉴스 -->
+  
+  <div class="card">
+    <div class="card-title">주요 뉴스</div>
+    <ul class="news-list">
+      
+      
+      <li>
+        <span class="news-source">국내</span>
+        <a href="https://n.news.naver.com/mnews/article/018/0006414698" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">보험사기 전력자 보험모집시장 진입 막는다</a>
+      </li>
+      
+      
+      
+      <li>
+        <span class="news-source">국내</span>
+        <a href="https://n.news.naver.com/mnews/article/586/0000142901" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">'젠슨 황 효과'에 코스피 5% 급등…매수 사이드카 발동</a>
+      </li>
+      
+      
+      
+      <li>
+        <span class="news-source">국내</span>
+        <a href="https://n.news.naver.com/mnews/article/001/0016460328" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">헬스장·요가·필라테스 2천500곳 점검…11곳 가격표시 미이행</a>
+      </li>
+      
+      
+      
+      
+      <li>
+        <span class="news-source">CNBC</span>
+        <a href="https://www.cnbc.com/2026/11/23/john-williams-fed-inflation-rate-hikes.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">연준 윌리엄스 총재, 인플레이션 대응 위해 '시간이 지나면' 금리 인상 가능성 시사</a>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">Fed's John Williams indicates higher interest rates likely 'over time' to address inflation</div>
+      </li>
+      
+      <li>
+        <span class="news-source">CNBC</span>
+        <a href="https://www.cnbc.com/2026/11/23/nvidia-jensen-huang-ceo-market-rally.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">'이것이 바닥을 형성한다': 젠슨 황의 복귀는 시장 매도세를 멈출 것으로 전망</a>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">‘This establishes a bottom’: Jensen Huang’s return seen as likely to stop market sell-off, for now</div>
+      </li>
+      
+      <li>
+        <span class="news-source">CNBC</span>
+        <a href="https://www.cnbc.com/2026/11/22/foundation-future-industries-health-benefits-payroll-base-group.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">에릭 트럼프가 후원한 로봇 스타트업, 현금 부족 심화되며 직원 건강보험 혜택 중단</a>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">Employees at Eric Trump-backed robot startup lose health benefits as company's cash crunch deepens</div>
+      </li>
+      
+      <li>
+        <span class="news-source">CNBC</span>
+        <a href="https://www.cnbc.com/2026/11/21/china-xi-trump-putin-global-diplomacy-shenzhen.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">중국이 정상회담을 통해 글로벌 영향력을 어떻게 확장하고 있는가</a>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:2px">How China is using summits to expand its global influence</div>
+      </li>
+      
+      
+    </ul>
+  </div>
+  
+
+  <!-- 7. 인사이트 -->
+  <div class="card insight-card">
+    <div class="card-title">오늘의 인사이트</div>
+    <div class="insight-text">젠슨 황의 복귀가 AI 시장 심리를 안정시키며 글로벌 증시의 바닥을 형성했다는 평가가 우세합니다. 다만, 연준의 금리 인상 시사 발언은 중장기적으로 밸류에이션 부담 요인으로 작용할 수 있어 AI 테마의 지속성을 주시해야 합니다.</div>
+    
+    <div class="risk-label">⚠ 주요 리스크</div>
+    <div class="risk-text">연준의 추가 금리 인상 가능성과 AI 데이터센터 투자 리스크가 여전히 상존합니다.</div>
+    
+  </div>
+
+  <!-- QR 코드 -->
+  
+  <div class="card qr-wrap">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJQAAACUAQAAAABdRz15AAABP0lEQVR4nM2WQXLEMAgE+QH//+X8gNAgb7YqN48O0cErtavWmBnAUX+W4l+xiMiq6G0oOZisQVYfVMrk4LLIQ2IPN1hW5NldYeqVpbrB+rXJZcxjfvPyliHLZ33p9pax2BUaffnqLUs8JLWBOgGz91gfmtfaiDsmq3UPhiSjUSbry6Sh/1vcTZdxaYsXcpEKk7WDcCQFIwzkMpThvaWRS2WyINL1Y/8ezQ3WIRNsy93PQH+TTTkrNt7jIYeRVGyETKJsTCaCpWpysrEWMFgd4ad3fzz0ngUPmIyi+ulhBmt1Yvxdo9f4yWK4e2uZJJw+bjBKjwFKE2OcmoyFh9reODLTZHHMWDPwTg8z2DZCqoWxFz7bcDex03kuMMaU+LJZT9qMkTcT9Jl5BptvpNNrnh5msJnxqiduuez29+ld9gNu3s48eba2hQAAAABJRU5ErkJggg==" alt="브리핑 QR코드" />
+    <div class="qr-label">카카오톡 오픈채팅 공유용 QR</div>
+  </div>
+  
+
+  <!-- 8. 면책 문구 -->
+  <div class="disclaimer">
+    본 브리핑은 투자 참고 자료이며 투자 권유가 아닙니다.<br>
+    투자 손실에 대한 책임은 투자자 본인에게 있습니다.<br>
+    <small>Generated 2026년 11월 24일 (Tue) · finance-briefing</small>
+  </div>
+
+</div>
+</body>
+</html>
